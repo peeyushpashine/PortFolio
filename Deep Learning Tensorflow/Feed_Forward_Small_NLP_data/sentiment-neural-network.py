@@ -1,3 +1,10 @@
+'''
+Run sentiment-neural-network.py in command line. This project does feed forward neural network learning for Text data
+create_sentiment_featurset.py is basically doing data preprocessing and feature engineering.
+
+'''
+
+
 import tensorflow as tf 
 
 import numpy as np
