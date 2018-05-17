@@ -151,241 +151,241 @@ print(not_found)
 print("===================================================")
 print('We are done with 1st level of matching')
 
-# not_matched = []
-# for i in not_found:
-#     not_matched.append(train_arr[i])
+not_matched = []
+for i in not_found:
+    not_matched.append(train_arr[i])
 
-# not_matched_test  = copy.copy(not_matched)
+not_matched_test  = copy.copy(not_matched)
 
-# test_df  = pd.DataFrame({'mcn':mcn_arr_test, 'name-address':train_arr})
-# golden_df = pd.DataFrame({'mcn':mcn_arr_golden, 'name-address':golden_flat_list})
+test_df  = pd.DataFrame({'mcn':mcn_arr_test, 'name-address':train_arr})
+golden_df = pd.DataFrame({'mcn':mcn_arr_golden, 'name-address':golden_flat_list})
 
-# names = pd.concat([test_df, golden_df])
-# len(names)
+names = pd.concat([test_df, golden_df])
+len(names)
 
-# def get_matches_df(sparse_matrix, name_vector, top=1000):
-#     non_zeros = sparse_matrix.nonzero()
+def get_matches_df(sparse_matrix, name_vector, top=1000):
+    non_zeros = sparse_matrix.nonzero()
     
-#     sparserows = non_zeros[0]
-#     sparsecols = non_zeros[1]
+    sparserows = non_zeros[0]
+    sparsecols = non_zeros[1]
     
-#     if top:
-#         nr_matches = top
-#     else:
-#         nr_matches = sparsecols.size
+    if top:
+        nr_matches = top
+    else:
+        nr_matches = sparsecols.size
     
-#     left_side = np.empty([nr_matches], dtype=object)
-#     right_side = np.empty([nr_matches], dtype=object)
-#     similairity = np.zeros(nr_matches)
+    left_side = np.empty([nr_matches], dtype=object)
+    right_side = np.empty([nr_matches], dtype=object)
+    similairity = np.zeros(nr_matches)
     
-#     for index in range(0, nr_matches):
-#         left_side[index] = name_vector[sparserows[index]]
-#         right_side[index] = name_vector[sparsecols[index]]
-#         similairity[index] = sparse_matrix.data[index]
+    for index in range(0, nr_matches):
+        left_side[index] = name_vector[sparserows[index]]
+        right_side[index] = name_vector[sparsecols[index]]
+        similairity[index] = sparse_matrix.data[index]
     
-#     return pd.DataFrame({'left_side': left_side,
-#                           'right_side': right_side,
-#                            'similairity': similairity})
+    return pd.DataFrame({'left_side': left_side,
+                          'right_side': right_side,
+                           'similairity': similairity})
         
 
-# for i in range(0, len(golden_flat_list)):
-#     not_matched.append(golden_flat_list[i])
+for i in range(0, len(golden_flat_list)):
+    not_matched.append(golden_flat_list[i])
 
-# full_data = copy.copy(test_data)
+full_data = copy.copy(test_data)
 
-# for i in range(0, len(golden_flat_list)):
-#     full_data.append(golden_flat_list[i])
-
-
-
-
-# def ngrams_partial(string, n=1):
-#     string = re.sub(r'[,-./]|\sBD',r'', string)
-#     ngrams = zip(*[string[i:] for i in range(n)])
-#     return [''.join(ngram) for ngram in ngrams]
+for i in range(0, len(golden_flat_list)):
+    full_data.append(golden_flat_list[i])
 
 
 
-# company_names = full_data
-# vectorizer = TfidfVectorizer(min_df=1, analyzer=ngrams_partial)
-# tf_idf_matrix_partial = vectorizer.fit_transform(company_names)
+
+def ngrams_partial(string, n=1):
+    string = re.sub(r'[,-./]|\sBD',r'', string)
+    ngrams = zip(*[string[i:] for i in range(n)])
+    return [''.join(ngram) for ngram in ngrams]
 
 
-# def awesome_cossim_top(A, B, ntop, lower_bound=0):
 
-#     A = A.tocsr()
-#     B = B.tocsr()
-#     M, _ = A.shape
-#     _, N = B.shape
+company_names = full_data
+vectorizer = TfidfVectorizer(min_df=1, analyzer=ngrams_partial)
+tf_idf_matrix_partial = vectorizer.fit_transform(company_names)
+
+
+def awesome_cossim_top(A, B, ntop, lower_bound=0):
+
+    A = A.tocsr()
+    B = B.tocsr()
+    M, _ = A.shape
+    _, N = B.shape
  
-#     idx_dtype = np.int32
+    idx_dtype = np.int32
  
-#     nnz_max = M*ntop
+    nnz_max = M*ntop
  
-#     indptr = np.zeros(M+1, dtype=idx_dtype)
-#     indices = np.zeros(nnz_max, dtype=idx_dtype)
-#     data = np.zeros(nnz_max, dtype=A.dtype)
+    indptr = np.zeros(M+1, dtype=idx_dtype)
+    indices = np.zeros(nnz_max, dtype=idx_dtype)
+    data = np.zeros(nnz_max, dtype=A.dtype)
 
-#     ct.sparse_dot_topn(
-#         M, N, np.asarray(A.indptr, dtype=idx_dtype),
-#         np.asarray(A.indices, dtype=idx_dtype),
-#         A.data,
-#         np.asarray(B.indptr, dtype=idx_dtype),
-#         np.asarray(B.indices, dtype=idx_dtype),
-#         B.data,
-#         ntop,
-#         lower_bound,
-#         indptr, indices, data)
+    ct.sparse_dot_topn(
+        M, N, np.asarray(A.indptr, dtype=idx_dtype),
+        np.asarray(A.indices, dtype=idx_dtype),
+        A.data,
+        np.asarray(B.indptr, dtype=idx_dtype),
+        np.asarray(B.indices, dtype=idx_dtype),
+        B.data,
+        ntop,
+        lower_bound,
+        indptr, indices, data)
 
-#     return csr_matrix((data,indices,indptr),shape=(M,N))
+    return csr_matrix((data,indices,indptr),shape=(M,N))
 
-# t1 = time.time()
-# matches_partial = awesome_cossim_top(tf_idf_matrix_partial, tf_idf_matrix_partial.transpose(), 40, 0.50)
-# t = time.time()-t1
-# print("SELFTIMED:", t)
+t1 = time.time()
+matches_partial = awesome_cossim_top(tf_idf_matrix_partial, tf_idf_matrix_partial.transpose(), 40, 0.50)
+t = time.time()-t1
+print("SELFTIMED:", t)
 
-# matches_partial_df = get_matches_df(matches_partial, company_names,len(company_names))
-# matches_partial_df = matches_partial_df[matches_partial_df['similairity'] <= 0.99999] # Remove all exact matches
+matches_partial_df = get_matches_df(matches_partial, company_names,len(company_names))
+matches_partial_df = matches_partial_df[matches_partial_df['similairity'] <= 0.99999] # Remove all exact matches
 
-# golden_partial_mcn_list = []
-# for i in range(0, len(matches_partial_df)):
+golden_partial_mcn_list = []
+for i in range(0, len(matches_partial_df)):
     
-#     if matches_partial_df['right_side'].tolist()[i] in golden_dict.values():
-#         for mcn, value in golden_dict.items():
-#             if (value == matches_partial_df['right_side'].tolist()[i]):
-#                 golden_partial_mcn_list.append(mcn)
-#                 break
-#     else:
-#         golden_partial_mcn_list.append(0)
+    if matches_partial_df['right_side'].tolist()[i] in golden_dict.values():
+        for mcn, value in golden_dict.items():
+            if (value == matches_partial_df['right_side'].tolist()[i]):
+                golden_partial_mcn_list.append(mcn)
+                break
+    else:
+        golden_partial_mcn_list.append(0)
             
   
-# test_partial_mcn_list = []
-# for i in range(0, len(matches_partial_df)): 
-#     if matches_partial_df['left_side'].tolist()[i] in test_dict.values():   
-#         for mcn, value in test_dict.items():
-#             if (value == matches_partial_df['left_side'].tolist()[i]):
-#                 test_partial_mcn_list.append(mcn) 
-#                 break       
-#     else:
-#         test_partial_mcn_list.append(0)
+test_partial_mcn_list = []
+for i in range(0, len(matches_partial_df)): 
+    if matches_partial_df['left_side'].tolist()[i] in test_dict.values():   
+        for mcn, value in test_dict.items():
+            if (value == matches_partial_df['left_side'].tolist()[i]):
+                test_partial_mcn_list.append(mcn) 
+                break       
+    else:
+        test_partial_mcn_list.append(0)
             
 
-# score = 0
-# score_list=[]
-# matched_list_step2=[]
-# for i in range(0, len(test_partial_mcn_list)):
+score = 0
+score_list=[]
+matched_list_step2=[]
+for i in range(0, len(test_partial_mcn_list)):
   
-#     if test_partial_mcn_list[i] == golden_partial_mcn_list[i]:
-#         if test_partial_mcn_list[i] != 0:
-#             score+=1
-#             # score_list is for removing dumplicates from the final matched data
-#             score_list.extend(([test_partial_mcn_list[i], matches_partial_df['left_side'].tolist()[i]]))
-# #             print("MCN Number in test data is {} and test sample is {}".format(test_partial_mcn_list[i], matches_partial_df['left_side'].tolist()[i]))
-# #             print("MCN Number in golden data is {} and golden sample is {}".format(golden_partial_mcn_list[i], matches_partial_df['right_side'].tolist()[i]))
-# #             print("score is {}".format(matches_partial_df['similairity'].tolist()[i]))
-# #             print('================================================================================') 
-#             matched_list_step2.append(matches_partial_df['left_side'].tolist()[i])
-#         if test_partial_mcn_list[i] == test_partial_mcn_list[i+1]:
+    if test_partial_mcn_list[i] == golden_partial_mcn_list[i]:
+        if test_partial_mcn_list[i] != 0:
+            score+=1
+            # score_list is for removing dumplicates from the final matched data
+            score_list.extend(([test_partial_mcn_list[i], matches_partial_df['left_side'].tolist()[i]]))
+#             print("MCN Number in test data is {} and test sample is {}".format(test_partial_mcn_list[i], matches_partial_df['left_side'].tolist()[i]))
+#             print("MCN Number in golden data is {} and golden sample is {}".format(golden_partial_mcn_list[i], matches_partial_df['right_side'].tolist()[i]))
+#             print("score is {}".format(matches_partial_df['similairity'].tolist()[i]))
+#             print('================================================================================') 
+            matched_list_step2.append(matches_partial_df['left_side'].tolist()[i])
+        if test_partial_mcn_list[i] == test_partial_mcn_list[i+1]:
             
-#             continue
+            continue
 
 
             
-# accuracy = 0.5*len(set(score_list))/(len(not_matched_test)) *100 
+accuracy = 0.5*len(set(score_list))/(len(not_matched_test)) *100 
                   
-# # print('====================================================')   
-# # print('====================================================')  
-# print("Accuracy on full data is {} %".format(accuracy))
+# print('====================================================')   
+# print('====================================================')  
+print("Accuracy on full data is {} %".format(accuracy))
 
-# matched_list_step2 = list(set(matched_list_step2))
-# print(matched_list_step2)
+matched_list_step2 = list(set(matched_list_step2))
+print(matched_list_step2)
 
-# not_matched_test_step2 = [item for item in not_matched_test if item not in matched_list_step2]
+not_matched_test_step2 = [item for item in not_matched_test if item not in matched_list_step2]
 
-# test_partial_mcn_list_step2 = []
-# for i in range(0, len(not_matched_test_step2)):
-#     for mcn, value in test_dict.items():     
-#         if (value == not_matched_test_step2[i]):                            
-#             test_partial_mcn_list_step2.append(mcn)     
-#             break
+test_partial_mcn_list_step2 = []
+for i in range(0, len(not_matched_test_step2)):
+    for mcn, value in test_dict.items():     
+        if (value == not_matched_test_step2[i]):                            
+            test_partial_mcn_list_step2.append(mcn)     
+            break
 
   
-# test_data_split_features = []
-# for i in range(0, len(not_matched_test_step2)):
-#     z= not_matched_test_step2[i].split(' ')
-#     z[2:-2] = []
-#     z = ' '.join(z)
-#     test_data_split_features.append(z)
+test_data_split_features = []
+for i in range(0, len(not_matched_test_step2)):
+    z= not_matched_test_step2[i].split(' ')
+    z[2:-2] = []
+    z = ' '.join(z)
+    test_data_split_features.append(z)
 
 
-# choices = golden_dict.values()
-# score= 0
-# found_flag=0
-# not_found={}
-# for k in range(0, 25):
+choices = golden_dict.values()
+score= 0
+found_flag=0
+not_found={}
+for k in range(0, 25):
         
-#     for i in range(0, len(test_data_split_features)-1):
-#         found_flag=0
-#         not_found_iteration = 0
-#         chlist=process.extract(test_data_split_features[i], choices, limit=k)
-#         print("{},   --test--{}".format(test_data_split_features[i], test_partial_mcn_list_step2[i]))
+    for i in range(0, len(test_data_split_features)-1):
+        found_flag=0
+        not_found_iteration = 0
+        chlist=process.extract(test_data_split_features[i], choices, limit=k)
+        print("{},   --test--{}".format(test_data_split_features[i], test_partial_mcn_list_step2[i]))
         
-#         for mcn,value in golden_dict.items():
-#             for j in range(0,k):
-#                 if value == chlist[j][0]:
-#                     if test_partial_mcn_list_step2[i] == mcn:
-#                         score+=1
+        for mcn,value in golden_dict.items():
+            for j in range(0,k):
+                if value == chlist[j][0]:
+                    if test_partial_mcn_list_step2[i] == mcn:
+                        score+=1
                         
+                        print("{},   --MDM--{}".format(chlist[j][0], mcn))
+                        print("===================================================")
+                        found_flag=1
+                        break
+        if found_flag == 0:
+            not_found_iteration.append(i)
+            not_found[k] = not_found_iteration
+        
+print("Total matches found are {} out of {}".format(score, len(test_data_split_features)))        
+print('accuracy is', 100* score/len(test_data_split_features), '%')
+print('mismatched sample indexes in test data are:')
+print(not_found)
+print("===================================================")
+print('We are done with 1st level of matching')
+
+
+
+choices = golden_dict.values()
+accuracy = []
+not_found= {}
+for k in range(25,40):
+    not_found_iteration = []
+    found_flag=0
+    score= 0
+    
+    for i in range(0, len(test_data)-1):
+        found_flag=0
+        chlist=process.extract(test_data[i], choices, limit=k)
+#         print("{},   --test--{}".format(test_data[i], mcn_arr_test[i]))
+
+        for mcn,value in golden_dict.items():
+            for j in range(0,k):
+                if value == chlist[j][0]:
+                    if mcn_arr_test[i] == mcn:
+                        score+=1
+
 #                         print("{},   --MDM--{}".format(chlist[j][0], mcn))
 #                         print("===================================================")
-#                         found_flag=1
-#                         break
-#         if found_flag == 0:
-#             not_found_iteration.append(i)
-#             not_found[k] = not_found_iteration
-        
-# print("Total matches found are {} out of {}".format(score, len(test_data_split_features)))        
-# print('accuracy is', 100* score/len(test_data_split_features), '%')
-# print('mismatched sample indexes in test data are:')
-# print(not_found)
-# print("===================================================")
-# print('We are done with 1st level of matching')
-
-
-
-# choices = golden_dict.values()
-# accuracy = []
-# not_found= {}
-# for k in range(25,40):
-#     not_found_iteration = []
-#     found_flag=0
-#     score= 0
+                        found_flag=1
+                        break
+        if found_flag == 0:
+            not_found_iteration.append(i)
+            not_found[k] = not_found_iteration
+    accuracy.append(100* score/len(test_data))
+#     print("Total matches found are {} out of {}".format(score, len(test_data)))        
+    print('accuracy is', 100* score/len(test_data), '%')
+    print('mismatched sample indexes in test data are:')
+#     print(not_found)
     
-#     for i in range(0, len(test_data)-1):
-#         found_flag=0
-#         chlist=process.extract(test_data[i], choices, limit=k)
-# #         print("{},   --test--{}".format(test_data[i], mcn_arr_test[i]))
-
-#         for mcn,value in golden_dict.items():
-#             for j in range(0,k):
-#                 if value == chlist[j][0]:
-#                     if mcn_arr_test[i] == mcn:
-#                         score+=1
-
-# #                         print("{},   --MDM--{}".format(chlist[j][0], mcn))
-# #                         print("===================================================")
-#                         found_flag=1
-#                         break
-#         if found_flag == 0:
-#             not_found_iteration.append(i)
-#             not_found[k] = not_found_iteration
-#     accuracy.append(100* score/len(test_data))
-# #     print("Total matches found are {} out of {}".format(score, len(test_data)))        
-#     print('accuracy is', 100* score/len(test_data), '%')
-#     print('mismatched sample indexes in test data are:')
-# #     print(not_found)
-    
-#     print("===================================================")
-#     print('We are done with 1st level of matching')
-# print(accuracy)
-# print(not_found)
+    print("===================================================")
+    print('We are done with 1st level of matching')
+print(accuracy)
+print(not_found)
